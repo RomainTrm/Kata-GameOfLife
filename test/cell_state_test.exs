@@ -1,4 +1,4 @@
-defmodule CellStateTest do
+defmodule Cell.State.Test do
   use ExUnit.Case
 
   test "A dead cell turns alive when exactly 3 living neighbor" do

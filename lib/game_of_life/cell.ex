@@ -5,6 +5,19 @@ defmodule GameOfLife.Cell do
     def get_cell_name(%Coordinates{:x => x, :y => y}) do
       :"#{x}-#{y}"
     end
+
+    def get_surrounding(
+      %Coordinates{:x => x, :y => y} = coor,
+      %Coordinates{:x => max_x, :y => max_y}) do
+      x-1..x+1
+      |> Enum.filter(&(&1 >= 0 && &1 <= max_x))
+      |> Enum.flat_map(fn x ->
+        y-1..y+1
+        |> Enum.filter(&(&1 >= 0 && &1 <= max_y))
+        |> Enum.map(fn y -> %Coordinates{:x => x, :y => y} end)
+      end)
+      |> Enum.filter(&(&1 != coor))
+    end
   end
 
   defmodule State do
