@@ -9,7 +9,17 @@ defmodule GameOfLife.Application do
   def start(_type, _args) do
     children = [
       # Starts a worker by calling: GameOfLife.Worker.start_link(arg)
-      # {GameOfLife.Worker, arg}
+      {GameOfLife.Game, [
+        {%GameOfLife.Cell.Coordinates{x: 0, y: 0}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 0, y: 1}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 0, y: 2}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 1, y: 0}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 1, y: 1}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 1, y: 2}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 2, y: 0}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 2, y: 1}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 2, y: 2}, :dead},
+      ]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
