@@ -19,7 +19,7 @@ defmodule GameOfLife.Cell do
   end
 
   defmodule State do
-    defstruct coordinates: %Coordinates{}, generation: 0, current_state: :dead, next_state: :dead
+    defstruct coordinates: %Coordinates{}, max_coordinates: %Coordinates{}, generation: 0, current_state: :dead, next_state: :dead
 
     def nextState(_current, 3), do: :alive
     def nextState(:alive, 2), do: :alive
@@ -29,11 +29,12 @@ defmodule GameOfLife.Cell do
   use GenServer
 
   # Public API
-  def start_link(%Coordinates{} = coor, initialState) do
+  def start_link(%Coordinates{} = coor, initialState, %Coordinates{} = max_coor) do
     GenServer.start_link(__MODULE__, %State{
       coordinates: coor,
       current_state: initialState,
       next_state: initialState,
+      max_coordinates: max_coor,
      }, name: Coordinates.get_cell_name(coor))
   end
 
@@ -56,7 +57,7 @@ defmodule GameOfLife.Cell do
 
   def handle_call(:tick, _from, %State{} = state) do
     nb_living_cells_surrounding =
-      Coordinates.get_surrounding(state.coordinates, %Coordinates{x: 2, y: 2})
+      Coordinates.get_surrounding(state.coordinates, state.max_coordinates)
       |> Enum.map(&(get_next_state(&1, state.generation)))
       |> Enum.count(&(&1 == :alive))
 

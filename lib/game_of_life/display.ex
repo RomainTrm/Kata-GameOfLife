@@ -1,8 +1,8 @@
 defmodule GameOfLife.Display do
-  def display(cells) do
-    0..2
+  def display(cells, max_coordinates) do
+    0..max_coordinates.x
     |> Enum.map(fn x ->
-      0..2
+      0..max_coordinates.y
       |> Enum.map(fn y ->
         cell_name =
           %GameOfLife.Cell.Coordinates{x: x, y: y}

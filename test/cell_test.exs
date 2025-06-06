@@ -15,7 +15,7 @@ defmodule Cell.Test do
     ]
 
     cells |> Enum.map(fn {coord, initial_state} ->
-      GameOfLife.Cell.start_link(coord, initial_state)
+      GameOfLife.Cell.start_link(coord, initial_state, %GameOfLife.Cell.Coordinates{x: 2, y: 2})
     end)
 
     assert GameOfLife.Cell.get_state(%GameOfLife.Cell.Coordinates{x: 1, y: 1}) == :alive
