@@ -7,40 +7,9 @@ defmodule GameOfLife.Application do
 
   @impl true
   def start(_type, _args) do
-    blinker = [
-      [:dead,  :dead,  :dead  ],
-      [:alive, :alive, :alive ],
-      [:dead,  :dead,  :dead  ],
-    ]
-
-    toad = [
-      [:dead,  :dead,  :dead,  :dead ],
-      [:dead,  :alive, :alive, :alive],
-      [:alive, :alive, :alive, :dead ],
-      [:dead,  :dead,  :dead,  :dead ],
-    ]
-
-    glider = [
-      [:dead,  :alive,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :alive, :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:alive, :alive, :alive, :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-      [:dead,  :dead,  :dead,  :dead, :dead, :dead, :dead, :dead, :dead, :dead, :dead ],
-    ]
-
-    # initial_state = blinker
-    # initial_state = toad
-    initial_state = glider
-
     children = [
       # Starts a worker by calling: GameOfLife.Worker.start_link(arg)
-      {GameOfLife.Game, build_cell_coordinates initial_state},
+      {GameOfLife.Game, build_cell_coordinates GameOfLife.Patterns.gosper_glider_gun()},
       {GameOfLife.Ticker, nil}
     ]
 
