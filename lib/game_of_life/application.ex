@@ -40,7 +40,8 @@ defmodule GameOfLife.Application do
 
     children = [
       # Starts a worker by calling: GameOfLife.Worker.start_link(arg)
-      {GameOfLife.Game, build_cell_coordinates initial_state}
+      {GameOfLife.Game, build_cell_coordinates initial_state},
+      {GameOfLife.Ticker, nil}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

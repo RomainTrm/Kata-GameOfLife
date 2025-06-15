@@ -1,5 +1,7 @@
 defmodule GameOfLife.Display do
   def display(cells, max_coordinates) do
+    IEx.Helpers.clear
+
     0..max_coordinates.x
     |> Enum.map(fn x ->
       0..max_coordinates.y
