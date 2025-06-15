@@ -7,9 +7,7 @@ defmodule GameOfLife.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Starts a worker by calling: GameOfLife.Worker.start_link(arg)
-      {GameOfLife.Game, [
+    blinker = [
         {%GameOfLife.Cell.Coordinates{x: 0, y: 0}, :dead},
         {%GameOfLife.Cell.Coordinates{x: 0, y: 1}, :dead},
         {%GameOfLife.Cell.Coordinates{x: 0, y: 2}, :dead},
@@ -19,7 +17,30 @@ defmodule GameOfLife.Application do
         {%GameOfLife.Cell.Coordinates{x: 2, y: 0}, :dead},
         {%GameOfLife.Cell.Coordinates{x: 2, y: 1}, :dead},
         {%GameOfLife.Cell.Coordinates{x: 2, y: 2}, :dead},
-      ]}
+      ]
+
+    grenouille = [
+        {%GameOfLife.Cell.Coordinates{x: 0, y: 0}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 0, y: 1}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 0, y: 2}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 0, y: 3}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 1, y: 0}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 1, y: 1}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 1, y: 2}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 1, y: 3}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 2, y: 0}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 2, y: 1}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 2, y: 2}, :alive},
+        {%GameOfLife.Cell.Coordinates{x: 2, y: 3}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 3, y: 0}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 3, y: 1}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 3, y: 2}, :dead},
+        {%GameOfLife.Cell.Coordinates{x: 3, y: 3}, :dead},
+    ]
+
+    children = [
+      # Starts a worker by calling: GameOfLife.Worker.start_link(arg)
+      {GameOfLife.Game, grenouille}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
