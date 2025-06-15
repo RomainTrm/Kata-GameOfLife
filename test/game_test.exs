@@ -1,6 +1,9 @@
 defmodule Cell.Test do
   use ExUnit.Case
 
+  # This test doesn't work, apparently this not how we're supposed to test genservers
+  # Processes don't seem to communicate (or even exist) when executing
+  # For example: first assertion fail to receive the expected initial state (no computation happend yet)
   test "should change state on tick and compute next state" do
     cells = [
       {%GameOfLife.Cell.Coordinates{x: 0, y: 0}, :dead},
