@@ -30,12 +30,10 @@ defmodule GameOfLife.Game do
   end
 
   def handle_cast(:tick, {cells, max_coordinates}) do
-    cells |> Enum.map(&(GameOfLife.Cell.tick/1))
-
     cells
     |> Enum.map(fn cell ->
       name = GameOfLife.Cell.Coordinates.get_cell_name(cell)
-      state = GameOfLife.Cell.get_state(cell)
+      state = GameOfLife.Cell.tick(cell)
       {name, state}
     end)
     |> GameOfLife.Display.display(max_coordinates)

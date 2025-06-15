@@ -19,7 +19,10 @@ defmodule GameOfLife.Cell do
   end
 
   defmodule State do
-    defstruct coordinates: %Coordinates{}, max_coordinates: %Coordinates{}, generation: 0, current_state: :dead, next_state: :dead
+    defstruct coordinates: %Coordinates{},
+      max_coordinates: %Coordinates{},
+      generation: 1,
+      state_per_generation: [{1, :dead}]
 
     def nextState(_current, 3), do: :alive
     def nextState(:alive, 2), do: :alive
@@ -32,8 +35,7 @@ defmodule GameOfLife.Cell do
   def start_link(%Coordinates{} = coor, initialState, %Coordinates{} = max_coor) do
     GenServer.start_link(__MODULE__, %State{
       coordinates: coor,
-      current_state: initialState,
-      next_state: initialState,
+      state_per_generation: [{1, initialState}],
       max_coordinates: max_coor,
      }, name: Coordinates.get_cell_name(coor))
   end
@@ -42,12 +44,8 @@ defmodule GameOfLife.Cell do
     GenServer.call Coordinates.get_cell_name(coor), :tick
   end
 
-  def get_state(%Coordinates{} = coor) do
-    GenServer.call Coordinates.get_cell_name(coor), :get_state
-  end
-
-  def get_next_state(%Coordinates{} = coor, generation) do
-    GenServer.call Coordinates.get_cell_name(coor), {:get_next_state, generation}
+  def get_state(%Coordinates{} = coor, generation) do
+    GenServer.call Coordinates.get_cell_name(coor), {:get_state, generation}
   end
 
   # Instance implementation
@@ -58,32 +56,35 @@ defmodule GameOfLife.Cell do
   def handle_call(:tick, _from, %State{} = state) do
     nb_living_cells_surrounding =
       Coordinates.get_surrounding(state.coordinates, state.max_coordinates)
-      |> Enum.map(&(get_next_state(&1, state.generation)))
+      |> Enum.map(&(get_state(&1, state.generation)))
       |> Enum.count(&(&1 == :alive))
 
-    next_state =
-      state.current_state
-      |> State.nextState(nb_living_cells_surrounding)
+    current_state =
+      state.state_per_generation
+      |> get_state_for_generation(state.generation)
 
-    {:reply, nil, %State{
+    next_state = State.nextState(current_state, nb_living_cells_surrounding)
+    next_generation = state.generation + 1
+    next_state_per_generation =
+      [{next_generation, next_state} | state.state_per_generation]
+      |> Enum.take(5)
+
+    {:reply, current_state, %State{
       state |
-        current_state: state.next_state,
-        next_state: next_state,
-        generation: state.generation + 1
+        state_per_generation: next_state_per_generation,
+        generation: next_generation
     }}
   end
 
-  def handle_call(:get_state, _from, %State{} = state) do
-      {:reply, state.current_state, state}
+  def handle_call({:get_state, generation}, _from, %State{} = state) do
+    cell_state_for_generation = get_state_for_generation(state.state_per_generation, generation)
+    {:reply, cell_state_for_generation, state}
   end
 
-  def handle_call({:get_next_state, generation}, _from, %State{} = state) do
-    cond do
-      state.generation == generation ->
-        {:reply, state.next_state, state}
-      state.generation == generation + 1 ->
-        {:reply, state.current_state, state}
-      true -> {:error, "invalid generation", state}
-    end
+  defp get_state_for_generation(state_per_generation, generation) do
+    state_per_generation
+    |> Enum.find_value(fn {state_generation, state} ->
+      if state_generation == generation, do: state
+    end)
   end
 end
