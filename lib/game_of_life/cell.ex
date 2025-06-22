@@ -20,9 +20,9 @@ defmodule GameOfLife.Cell do
 
   defmodule State do
     defstruct coordinates: %Coordinates{},
-      max_coordinates: %Coordinates{},
       generation: 1,
-      state_per_generation: [{1, :dead}]
+      state_per_generation: [{1, :dead}],
+      cells_surrounding: []
 
     def nextState(_current, 3), do: :alive
     def nextState(:alive, 2), do: :alive
@@ -36,7 +36,7 @@ defmodule GameOfLife.Cell do
     GenServer.start_link(__MODULE__, %State{
       coordinates: coor,
       state_per_generation: [{1, initialState}],
-      max_coordinates: max_coor,
+      cells_surrounding: Coordinates.get_surrounding(coor, max_coor),
      }, name: Coordinates.get_cell_name(coor))
   end
 
@@ -55,7 +55,7 @@ defmodule GameOfLife.Cell do
 
   def handle_call(:tick, _from, %State{} = state) do
     nb_living_cells_surrounding =
-      Coordinates.get_surrounding(state.coordinates, state.max_coordinates)
+      state.cells_surrounding
       |> Enum.map(&(get_state(&1, state.generation)))
       |> Enum.count(&(&1 == :alive))
 

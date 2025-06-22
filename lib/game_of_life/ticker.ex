@@ -1,5 +1,5 @@
 defmodule GameOfLife.Ticker do
-  @interval 500 # 500 milliseconds
+  @interval 100 # 100 milliseconds
 
   use GenServer
 
