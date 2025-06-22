@@ -7,11 +7,27 @@ defmodule GameOfLife.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      # Starts a worker by calling: GameOfLife.Worker.start_link(arg)
-      {GameOfLife.Game, build_cell_coordinates GameOfLife.Patterns.gosper_glider_gun()},
-      {GameOfLife.Ticker, nil}
-    ]
+    cells = build_cell_coordinates GameOfLife.Patterns.gosper_glider_gun()
+    cells_names = Enum.map(cells, fn {coor, _} -> GameOfLife.Cell.Coordinates.get_cell_name(coor) end)
+
+    max_coordinates =
+      cells
+      |> Enum.map(fn {%GameOfLife.Cell.Coordinates{} = coor, _} -> coor end)
+      |> Enum.max()
+
+    children =
+      ([
+        {GameOfLife.Game, nil},
+      ]
+      ++
+      Enum.map(cells, fn {%GameOfLife.Cell.Coordinates{} = coor, initial_state} ->
+        {GameOfLife.Cell, {coor, initial_state, max_coordinates}}
+      end)
+      ++
+      [
+        {GameOfLife.Display, {cells_names, Enum.count(cells)}},
+        {GameOfLife.Ticker, nil}
+      ])
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

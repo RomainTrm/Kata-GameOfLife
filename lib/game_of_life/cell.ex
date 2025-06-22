@@ -29,31 +29,30 @@ defmodule GameOfLife.Cell do
     def nextState(_current, _nb_living_surrounding), do: :dead
   end
 
-  use GenServer
+  use GenStage
 
   # Public API
-  def start_link(%Coordinates{} = coor, initialState, %Coordinates{} = max_coor) do
-    GenServer.start_link(__MODULE__, %State{
-      coordinates: coor,
-      state_per_generation: [{1, initialState}],
-      cells_surrounding: Coordinates.get_surrounding(coor, max_coor),
-     }, name: Coordinates.get_cell_name(coor))
-  end
-
-  def tick(%Coordinates{} = coor) do
-    GenServer.call Coordinates.get_cell_name(coor), :tick
+  def start_link({%Coordinates{} = coor, initialState, %Coordinates{} = max_coor}) do
+    GenStage.start_link(__MODULE__,
+      %State{
+        coordinates: coor,
+        state_per_generation: [{1, initialState}],
+        cells_surrounding: Coordinates.get_surrounding(coor, max_coor),
+      },
+      name: Coordinates.get_cell_name(coor)
+    )
   end
 
   def get_state(%Coordinates{} = coor, generation) do
-    GenServer.call Coordinates.get_cell_name(coor), {:get_state, generation}
+    GenStage.call Coordinates.get_cell_name(coor), {:get_state, generation}
   end
 
   # Instance implementation
   def init(state) do
-    {:ok, state}
+    {:producer_consumer, state, subscribe_to: [GameOfLife.Game]}
   end
 
-  def handle_call(:tick, _from, %State{} = state) do
+  def handle_events([:tick], _from, %State{} = state) do
     nb_living_cells_surrounding =
       state.cells_surrounding
       |> Enum.map(&(get_state(&1, state.generation)))
@@ -69,7 +68,7 @@ defmodule GameOfLife.Cell do
       [{next_generation, next_state} | state.state_per_generation]
       |> Enum.take(5)
 
-    {:reply, current_state, %State{
+    {:noreply, [{:new_generation, state.coordinates, state.generation, current_state}], %State{
       state |
         state_per_generation: next_state_per_generation,
         generation: next_generation
@@ -78,7 +77,7 @@ defmodule GameOfLife.Cell do
 
   def handle_call({:get_state, generation}, _from, %State{} = state) do
     cell_state_for_generation = get_state_for_generation(state.state_per_generation, generation)
-    {:reply, cell_state_for_generation, state}
+    {:reply, cell_state_for_generation, [], state}
   end
 
   defp get_state_for_generation(state_per_generation, generation) do
