@@ -1,27 +1,28 @@
 defmodule GameOfLife.Display do
-  def display(cells, max_coordinates) do
-    IEx.Helpers.clear
-
-    0..max_coordinates.x
-    |> Enum.map(fn x ->
-      0..max_coordinates.y
-      |> Enum.map(fn y ->
-        cell_name =
-          %GameOfLife.Cell.Coordinates{x: x, y: y}
-          |> GameOfLife.Cell.Coordinates.get_cell_name
-        [cell_state] =
-          cells
-          |> Enum.filter(fn {name, _state} -> name == cell_name end)
-          |> Enum.map(fn {_name, state} -> state end)
-          |> Enum.take(1)
-
-        cond do
-          cell_state == :alive -> IO.write("X")
-          cell_state == :dead -> IO.write("_")
-          true -> raise "Error"
-        end
+  def display(cells) do
+    generation =
+      cells
+      |> Enum.sort_by(fn {coordinates, _state} -> coordinates end)
+      |> Enum.map(fn {coordinates, state} ->
+        coordinateY = Map.get(coordinates, :y)
+        is_new_line = coordinateY == 0
+        cell_state =
+          cond do
+            state == :alive -> "X"
+            state == :dead -> "⠀"
+            true -> raise "Error"
+          end
+        {is_new_line, cell_state}
       end)
-      IO.puts("")
-    end)
+      |> Enum.reduce("",
+        fn
+          {true, cell_state}, acc -> acc <> "
+            " <> cell_state
+          {false, cell_state}, acc -> acc <> cell_state
+        end
+      )
+
+    IEx.Helpers.clear
+    IO.puts generation
   end
 end

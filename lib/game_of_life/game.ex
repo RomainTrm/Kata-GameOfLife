@@ -17,7 +17,7 @@ defmodule GameOfLife.Game do
         coor
       end)
 
-    GenServer.start_link(__MODULE__, {cells, max_coordinates}, name: __MODULE__)
+    GenServer.start_link(__MODULE__, cells, name: __MODULE__)
   end
 
   def tick do
@@ -29,15 +29,14 @@ defmodule GameOfLife.Game do
     {:ok, state}
   end
 
-  def handle_cast(:tick, {cells, max_coordinates}) do
+  def handle_cast(:tick, cells) do
     cells
     |> Enum.map(fn cell ->
-      name = GameOfLife.Cell.Coordinates.get_cell_name(cell)
       state = GameOfLife.Cell.tick(cell)
-      {name, state}
+      {cell, state}
     end)
-    |> GameOfLife.Display.display(max_coordinates)
+    |> GameOfLife.Display.display()
 
-    {:noreply, {cells, max_coordinates}}
+    {:noreply, cells}
   end
 end
